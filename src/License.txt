@@ -1,5 +1,5 @@
 /*****************************************************************************
-							   MIT License
+                               MIT License
 
 Copyright (c) 2020	Jonathon Rogers
 
@@ -22,44 +22,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include <iostream>
-#include "LinkedList_t.hpp"
-
-using std::cout;
-using std::cin;
-using std::endl;
-
-
-int main()
-{
-
-	LinkedList<int> ll;
-
-	ll.push_front( 5 );
-	ll.push_back( 5 );
-
-	ll.front();
-	ll.back();
-
-	ll.pop_front();
-	ll.pop_back();
-
-	ll.sort( &cmp );
-
-
-	auto it = ll.find( 17 );
-
-	*it = 19;
-
-	int value = -18;
-
-	ll.insert_before( it, value );
-	ll.insert_after( it, value );
-
-	ll.remove( it );
-
-
-	cin.get();
-	return 0;
-}
-
+The above License applies to all of the files in this repository.
