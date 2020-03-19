@@ -32,34 +32,32 @@ using std::endl;
 
 int main()
 {
-
 	LinkedList<int> ll;
 
-	ll.push_front( 5 );
-	ll.push_back( 5 );
+	cout << ll.debug_dump_internals() << endl;
 
-	ll.front();
-	ll.back();
+	for ( auto i = 0; i < 4; ++i )
+		ll.push_back( i );
 
-	ll.pop_front();
+
+	cout << ll.debug_dump_values() << endl;
+	cout << ll.debug_dump_internals() << endl;
+
+	ll.pop_back();
+	ll.pop_back();
 	ll.pop_back();
 
-	ll.sort( &cmp );
+	cout << ll.debug_dump_values() << endl;
+	cout << ll.debug_dump_internals() << endl;
 
+	ll.pop_back();
+	ll.pop_back();
+	ll.pop_back();
 
-	auto it = ll.find( 17 );
-
-	*it = 19;
-
-	int value = -18;
-
-	ll.insert_before( it, value );
-	ll.insert_after( it, value );
-
-	ll.remove( it );
+	cout << ll.debug_dump_values() << endl;
+	cout << ll.debug_dump_internals() << endl;
 
 
 	cin.get();
 	return 0;
 }
-
