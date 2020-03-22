@@ -24,10 +24,12 @@ SOFTWARE.
 
 #include <iostream>
 #include "LinkedList_t.hpp"
+#include <map>
 
 using std::cout;
 using std::cin;
 using std::endl;
+
 
 
 int main()
@@ -56,7 +58,6 @@ int main()
 
 	cout << ll.debug_dump_values() << endl;
 	cout << ll.debug_dump_internals() << endl;
-
 
 	cin.get();
 	return 0;

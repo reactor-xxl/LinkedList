@@ -3,42 +3,86 @@
 #include <string>
 #include <sstream>
 
-std::string to_string( const void *ptr )
-{
-	char buff[20] = { 0 };
+#include "utils.cpp"
 
-	if( ptr )
-		std::snprintf( buff, 20, "0x%p", ptr );
-	else
-		std::snprintf( buff, 20, "nullptr" );
-
-	return std::string( buff );
-}
-
+//std::string Utility::to_string( const void *ptr );
 
 template <typename U>
 using  CompareFunction = bool	(*)(const U & lhs, const U & rhs);
 
 
 template <typename T>
-class LinkedList
+class LinkedList_t
 {
 	class Node;
+//	static inline const std::string name{"LinkedList_t"};
+
 public:
 	class iterator
 	{
 	public:
 		iterator();
+		iterator( const iterator& it ) { *this = it; }
 		~iterator();
 
-		T&	operator*() const { return m_node->data; }
-		iterator&	operator=( const iterator& rhs );
+		T&	operator*() const
+		{
+			if ( !m_isValid || !m_isDereferenceable )
+				throw std::logic_error{ "LinkedList_t::iterator : iterator not dereferenceable" };
 
-		iterator&	operator++();
-		iterator&	operator--();
+			return m_node->data;
+		}
+		iterator&	operator=( const iterator& rhs )
+		{
+			m_parent = rhs.m_parent;
+			m_node = rhs.m_node;
+			m_isValid = rhs.m_isValid;
+			m_isDereferenceable = rhs.m_isDereferenceable;
+			m_afterEnd = rhs.m_afterEnd;
 
-		iterator&	operator++( int );
-		iterator&	operator--( int );
+			return *this;
+		}
+
+		iterator&	operator++()
+		{
+			if ( !m_node || !m_isValid )/* validity should not involve a nullptr check*/
+				throw std::out_of_range{ "LinkedList_t::iterator : iterator invalid" };
+
+			if ( !m_node->next )
+				throw std::out_of_range{ "LinkedList_t::iterator : cannot increment past end of list" };
+
+			m_node = m_node->next;
+
+			return *this;
+		}
+
+		iterator&	operator--()
+		{
+			if ( !m_node || !m_isValid )
+				throw std::out_of_range{ "iterator : iterator invalid" };
+
+			if ( !m_node->prev )
+				throw std::out_of_range{ "iterator : cannot decrement past start of list" };
+
+			m_node = m_node->prev;
+
+			return *this;
+		}
+
+		iterator	operator++( int )
+		{
+			auto it = *this;
+			operator++();
+			return it;
+		}
+
+		iterator	operator--( int )
+		{
+			auto it = *this;
+			operator--();
+			return it;
+		}
+
 
 		bool	operator == ( const iterator& rhs )	const;
 		bool	operator != ( const iterator& rhs )	const;
@@ -46,10 +90,12 @@ public:
 		bool	operator > ( const iterator& rhs )	const;
 
 //	private:
-		iterator( Node *node ) : m_node( node ) { ; }
+		iterator(const LinkedList<T>& parentList, Node *node ) : m_parent{&parentList}, m_node( node ) { ; }
+		const LinkedList<T>	*m_parent;/*are there any actual instances where the iterator should be invalidated?*/
 		Node	*m_node = nullptr;
 		bool	m_isValid = false;
 		bool	m_isDereferenceable = false;
+		bool	m_afterEnd = false;
 	};
 
 	void	push_front( const T& data )
@@ -143,15 +189,29 @@ public:
 
 	iterator	begin()
 	{
-		iterator it( m_head );
+		iterator it{ m_head };
 
 		if ( m_head )
 		{
 			it.m_isValid = true;
 			it.m_isDereferenceable = true;
 		}
+		return it;
 	}
-	iterator	end();
+
+	iterator	end()
+	{
+		iterator it{ m_tail };
+		it.m_afterEnd = true;
+
+		if ( m_tail )
+		{
+			it.m_isValid = true;
+			it.m_isDereferenceable = false;
+		}
+		return it;
+	}
+
 
 	iterator	cbegin();
 	iterator	cend();
@@ -187,8 +247,8 @@ public:
 		std::stringstream ss;
 		ss
 		<< "current size: " << size() << "\n"
-		<< "    Node  *m_head : " << to_string(m_head) << "\n"
-		<< "    Node  *m_tail : " << to_string(m_tail) << "\n";
+		<< "    Node  *m_head : " << Utility::to_string(m_head) << "\n"
+		<< "    Node  *m_tail : " << Utility::to_string(m_tail) << "\n";
 		return ss.str();
 	}
 
@@ -215,4 +275,12 @@ public:
 	Node	*m_tail = nullptr;
 
 };
+
+
+
+
+
+
+
+
 
