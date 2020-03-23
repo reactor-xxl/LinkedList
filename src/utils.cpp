@@ -5,7 +5,7 @@ namespace Utility {
 	std::string to_string( const std::string& str )
 	{
 		/* this may look dumb, but it actually has a use involving macros
-		and blind calls of to_string() on everything */
+			and blind calls of to_string() on everything */
 		return str;
 	}
 

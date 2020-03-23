@@ -21,9 +21,20 @@ public:
 	class iterator
 	{
 	public:
-		iterator();
+		iterator( Node *node = nullptr ) : m_node{ node }
+		{
+			if ( m_node )
+			{
+				m_isValid = true;
+				m_isDereferenceable = true;
+			}
+		}
+
 		iterator( const iterator& it ) { *this = it; }
-		~iterator();
+		~iterator(){ ; }	
+
+		bool is_valid() const { return m_isValid; }
+
 
 		T&	operator*() const
 		{
@@ -43,15 +54,25 @@ public:
 			return *this;
 		}
 
+#pragma message ("validity should not involve a nullptr check")
+
 		iterator&	operator++()
 		{
 			if ( !m_node || !m_isValid )/* validity should not involve a nullptr check*/
 				throw std::out_of_range{ "LinkedList_t::iterator : iterator invalid" };
 
-			if ( !m_node->next )
+			if ( m_afterEnd )
 				throw std::out_of_range{ "LinkedList_t::iterator : cannot increment past end of list" };
 
-			m_node = m_node->next;
+			if ( m_node->next )
+			{
+				m_node = m_node->next;
+			}
+			else
+			{
+				m_afterEnd = true;
+				m_isDereferenceable = false;
+			}
 
 			return *this;
 		}
@@ -64,7 +85,13 @@ public:
 			if ( !m_node->prev )
 				throw std::out_of_range{ "iterator : cannot decrement past start of list" };
 
-			m_node = m_node->prev;
+			if ( !m_afterEnd )
+			{
+				m_node = m_node->prev;
+			}
+
+			m_afterEnd = false;
+			m_isDereferenceable = true;
 
 			return *this;
 		}
@@ -84,14 +111,34 @@ public:
 		}
 
 
-		bool	operator == ( const iterator& rhs )	const;
-		bool	operator != ( const iterator& rhs )	const;
+		bool	operator == ( const iterator& rhs )	const
+		{
+			if( m_parent != rhs.m_parent) return false;
+
+			if( m_node != rhs.m_node) return false;
+
+			if( m_isValid != rhs.m_isValid) return false;
+
+			if( m_isDereferenceable != rhs.m_isDereferenceable) return false;
+
+			if( m_afterEnd != rhs.m_afterEnd) return false;
+
+			return true;
+		}
+
+		bool	operator != ( const iterator& rhs )	const
+		{
+			return !operator==( rhs );
+		}
+
 		bool	operator < ( const iterator& rhs )	const;
 		bool	operator > ( const iterator& rhs )	const;
 
 //	private:
-		iterator(const LinkedList<T>& parentList, Node *node ) : m_parent{&parentList}, m_node( node ) { ; }
-		const LinkedList<T>	*m_parent;/*are there any actual instances where the iterator should be invalidated?*/
+		iterator(const LinkedList_t<T>& parentList, Node *node ) : m_parent{&parentList}, m_node( node ) { ; }
+		const LinkedList_t<T>	*m_parent = { nullptr };
+#pragma message( "const LinkedList_t<T>	*m_parent <-- are there any actual instances\n" \
+		"where the iterator should be invalidated by the parent?")
 		Node	*m_node = nullptr;
 		bool	m_isValid = false;
 		bool	m_isDereferenceable = false;
@@ -159,8 +206,31 @@ public:
 	}
 
 
-	void	insert_before( const iterator&, const T& value );
-	void	insert_after( const iterator&, const T& value );
+	void	insert_before( const iterator& it, const T& value )
+	{
+		if( !it.is_valid() )
+			throw std::out_of_range{ "LinkedList_t::iterator : iterator invalid" };
+
+		auto node = it.m_node;
+		Node *newNode = new Node{ value };
+
+		newNode->prev = node->prev;
+		newNode->next = node;
+		node->prev = newNode;
+	}
+
+	void	insert_after( const iterator& it, const T& value )
+	{
+		if( !it.is_valid() )
+			throw std::out_of_range{ "LinkedList_t::iterator : iterator invalid" };
+
+		auto node = it.m_node;
+		Node *newNode = new Node{ value };
+
+		newNode->next = node->next;
+		newNode->prev = node;
+		node->next = newNode;
+	}
 
 	//	T&	front();
 	//	T&	back();
@@ -181,34 +251,51 @@ public:
 	}
 
 
-	void	remove( const iterator& );
+	void	remove( iterator& it )
+	{
+		if( !it.is_valid() )
+			throw std::out_of_range{ "LinkedList_t::iterator : iterator invalid" };
+
+		auto prevNode = it.m_node->prev;
+		auto nextNode = it.m_node->next;
+
+		if ( prevNode )
+			prevNode->next = nextNode;
+	
+		if ( nextNode )
+			nextNode->prev = prevNode;
+
+		delete it.m_node;
+		it.m_isDereferenceable = false;
+	}
 
 	void	sort( CompareFunction<T> );
 
-	iterator	find( const T& );
+	iterator	find( const T& val )
+	{
+		iterator it;
+
+		for ( it = begin(); it != end(); ++it )
+		{
+			if ( *it == val )
+				break;
+		}
+
+		return it;
+	}
 
 	iterator	begin()
 	{
-		iterator it{ m_head };
-
-		if ( m_head )
-		{
-			it.m_isValid = true;
-			it.m_isDereferenceable = true;
-		}
-		return it;
+		return iterator { m_head };
 	}
 
 	iterator	end()
 	{
 		iterator it{ m_tail };
-		it.m_afterEnd = true;
 
-		if ( m_tail )
-		{
-			it.m_isValid = true;
-			it.m_isDereferenceable = false;
-		}
+		it.m_afterEnd = true;
+		it.m_isDereferenceable = false;
+
 		return it;
 	}
 
@@ -270,6 +357,7 @@ public:
 
 		return ss.str();
 	}
+
 
 	Node	*m_head = nullptr;
 	Node	*m_tail = nullptr;
