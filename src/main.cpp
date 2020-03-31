@@ -36,71 +36,69 @@ using std::endl;
 int main()
 {
 
-	char c = 1;
-	int i = 1;
+	LinkedList_t ll;
 
-	char *pc = &c;
-	int *pi = &i;
-	void *pv = &i;
-
-	if ( pi == pv )
+	cout << "Adding values : ";
+	for ( auto i = 1; i < 10; ++i )
 	{
-		cout << "pointer comparisons between different types are meaningless." << endl;
+		cout << i << ", ";
+		ll.push_front( i );
 	}
 
-	LinkedList_t<int> ll;
+	cout << " - done adding values\n";
 
+	cout << ll.debug_dump_values() << endl;
 	cout << ll.debug_dump_internals() << endl;
 
-	for ( auto i = 0; i < 10; ++i )
+	cout << "\nll.pop_back() :\n";
+	ll.pop_back();
+
+	cout << ll.debug_dump_values() << endl;
+	cout << ll.debug_dump_internals() << endl;
+
+	cout << "\nll.pop_front() :\n";
+	ll.pop_front();
+
+	cout << ll.debug_dump_values() << endl;
+	cout << ll.debug_dump_internals() << endl;
+
+	auto it = ll.find( 23 );
+
+	if ( !it )
+		cout << "Value 23 not found.\n";
+
+	ll.pop_back();
+	ll.pop_front();
+
+	cout << ll.debug_dump_internals() << endl;
+	cout << ll.debug_dump_values() << endl;
+
+	ll.clear();
+
+	ll.pop_back();
+	ll.pop_front();
+
+	for ( auto i = 1; i < 5; ++i )
+	{
+		cout << i << ", ";
 		ll.push_back( i );
-
-	cout << ll.debug_dump_values() << endl;
-	cout << ll.debug_dump_internals() << endl;
-
-	auto it = ll.find( 5 );
-	ll.remove( it );
-
-	it = ll.find( 3 );
-	auto it2{ it };
-
-	*it2 = -15;
-
-	if ( it != it2 )
-	{
-		cout << "uh oh" << endl;
 	}
 
-	ll.insert_after( it2, 55 );
-	ll.insert_after( it2, 66 );
-	ll.insert_after( it2, 77 );
-	ll.insert_after( ll.begin(), -100 );
+	cout << ll.debug_dump_internals() << endl;
+	cout << ll.debug_dump_values() << endl;
 
-	auto it_end = ll.end();
-
-	try
+	for ( auto i = 1; i < 10; ++i )
 	{
-		*it_end = 57;
-	}
-	catch ( std::exception & e )
-	{
-		cout << e.what() << endl;
+		ll.pop_back();
+		ll.pop_front();
 	}
 
-	--it_end;
+	cout << "\n-----------------\nExplicit call to destructor:\n";
 
-	cout << "it_end == " << *it_end << endl;
+	ll.~LinkedList_t();
 
-
-	cout << ll.debug_dump_values() << endl;
 	cout << ll.debug_dump_internals() << endl;
-
-	ll.pop_back();
-	ll.pop_back();
-	ll.pop_back();
-
 	cout << ll.debug_dump_values() << endl;
-	cout << ll.debug_dump_internals() << endl;
 
 	cin.get();
 	return 0;

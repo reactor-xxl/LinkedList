@@ -5,6 +5,11 @@
 *Debug/*
 *x64/*
 
+# Broke stuff
+*.broken
+*.old
+
+
 # Prerequisites
 *.d
 
