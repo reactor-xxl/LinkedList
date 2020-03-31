@@ -13,8 +13,7 @@ template <typename U>
 using  CompareFunction = bool	(*)(const U & lhs, const U & rhs);
 
 
-//template <typename T>
-using T = int;
+template <typename T>
 class LinkedList_t
 {
 	struct Node;

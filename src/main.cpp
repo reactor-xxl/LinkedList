@@ -36,7 +36,7 @@ using std::endl;
 int main()
 {
 
-	LinkedList_t ll;
+	LinkedList_t<int> ll;
 
 	cout << "Adding values : ";
 	for ( auto i = 1; i < 10; ++i )
